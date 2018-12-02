@@ -1,0 +1,76 @@
+<html>
+<head>
+<title>test</title>
+<script>
+function connection(){
+    var canvas =  document.getElementById("canvas");
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = "black";
+
+    connection = new WebSocket('ws://127.0.0.1:8080');
+    connection.onopen = function(e) {
+        document.getElementById("connection").disabled= true;
+        console.log("Connection established!");
+
+        var startButton = document.getElementById("start");
+        startButton.attributes.removeNamedItem("disabled");
+        startButton.onclick = function(){
+            connection.send(JSON.stringify({"app":"start","width":canvas.width,"height":canvas.height}));
+            startButton.disabled= true;
+
+            var changeHzButton = document.getElementById("changeHz");
+            changeHzButton.attributes.removeNamedItem("disabled");
+            changeHzButton.onclick = function(){
+                connection.send(JSON.stringify({"app":"changeHz","Hz":document.getElementById("Hz").value}));
+            }
+        }
+    };
+
+    connection.onerror = function(e){
+        console.log(e);
+    }
+
+    var mesCount = 0;
+    var preTime=(new Date).getTime();
+    var fpsElem = document.getElementById("FPS");
+    connection.onmessage = function(e) {
+        // 描画
+        var jsonData = JSON.parse(e.data);
+        ctx.beginPath();
+        ctx.moveTo(jsonData.prePos.x, jsonData.prePos.y);
+        ctx.clearRect(jsonData.Pos.x,0,30,canvas.height);
+        if(jsonData.Pos.x!=0)ctx.lineTo(jsonData.Pos.x, jsonData.Pos.y);
+        ctx.stroke();
+        ctx.closePath();
+        
+        // FPS測定
+        mesCount++;
+        var now = (new Date).getTime();
+        var div = now - preTime;
+        if(div >= 1000){
+            fpsElem.textContent = "FPS:" + parseInt(1000 / (div / mesCount ));
+            mesCount = 0;
+            preTime = now;
+        }
+    };
+    connection.onclose = function(e) {
+        console.log(e.data);
+    };
+}
+window.onload=function(){
+    var canvas = document.getElementById("canvas");
+    canvas.width = canvas.parentElement.clientWidth;
+}
+</script>
+</head>
+<body>
+<button id="connection" onclick="connection()">connection</button>
+<button id="start" disabled >start</button>
+<button id="changeHz" disabled >changeHz</button>
+<input id="Hz" type=number value=10 step="0.1" min="0.1">
+<span id="FPS">FPS:</span>
+<div style="border:1px solid black;width:100%;margin-top:1em">
+    <canvas id="canvas" ></canvas>
+</div>
+</body>
+</html>
