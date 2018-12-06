@@ -10,85 +10,43 @@ class UserEventListener {
     public $connection;
     public $timer;
 
-    private $pos;
-    private $Hz;
-    private $velocity;
-
-    public function setHz($Hz){ 
-        $this->Hz->Set($Hz, null);
-    }
-
-    public function setVelocity($v){ 
-        $nowV = $this->velocity->Get();
-        $this->velocity->Set((object)["x"=>($nowV->x + $v->x),"y"=>($nowV->y + $v->y)], null);
-    }
+    private $objects=[];
 
     public function __construct($connection){
         $this->connection = $connection;
-        $this->pos = new SyncData(null);
-        $this->velocity = new SyncData((object)["x"=>0,"y"=>0]);
-        $this->Hz = new SyncData(10);
     }
 
     public function onStart($jsonMsg){
-        $this->pos->Set((object)["x"=>0,"y"=>$jsonMsg->height/2], null);
+        $this->objects[] = new MoveableObject(["pos"=>["x"=>0,"y"=>$jsonMsg->height/2]]);
 
+        // ゲームループ
         return function() use ($jsonMsg){
-            $result = (object)[];
-            $nowX = $this->pos->Get()->x + $this->velocity->Get()->x;
-            $nowX = $nowX > $jsonMsg->width ? 0 : ($nowX < 0 ? $jsonMsg->width : $nowX);
-            $nowY = $this->pos->Get()->y + $this->velocity->Get()->y;
-            $nowY = $nowY > $jsonMsg->height ? 0 : ($nowY < 0 ? $jsonMsg->height : $nowY);
-            $result->Pos = (object)["x"=>$nowX, "y"=>$nowY];
-            $this->pos->Set((object)["x"=>$nowX,"y"=>$nowY], null);
-
+            $result = [];
+            foreach($this->objects as $obj){
+                $tmp = $obj->onUpdate($jsonMsg);
+                if($tmp != null){
+                    $result[$obj->getTag()] = $obj->onUpdate($jsonMsg);
+                }
+            }
             $this->connection->send(json_encode($result));
         };
     }
 
     public function onKeyDown($jsonMsg){
-        $keydownV = (object)["x"=>0,"y"=>0];
-        switch($jsonMsg->key){
-            case "ArrowUp":
-                $keydownV->y = -1;
-                $this->setVelocity($keydownV);
-                break;
-            case "ArrowRight":
-                $keydownV->x = 1;
-                $this->setVelocity($keydownV);
-                break;
-            case "ArrowDown":
-                $keydownV->y = 1;
-                $this->setVelocity($keydownV);
-                break;
-            case "ArrowLeft":
-                $keydownV->x = -1;
-                $this->setVelocity($keydownV);
-                break;
-            default:
+        echo $jsonMsg->key." is Down\n";
+        foreach($this->objects as $obj){
+            if(is_callable([$obj, "onKeyDown"])){
+                $obj->onKeyDown($jsonMsg);
+            }
         }
     }
 
     public function onKeyUp($jsonMsg){
-        $keydownV = (object)["x"=>0,"y"=>0];
-        switch($jsonMsg->key){
-            case "ArrowUp":
-                $keydownV->y = 1;
-                $this->setVelocity($keydownV);
-                break;
-            case "ArrowRight":
-                $keydownV->x = -1;
-                $this->setVelocity($keydownV);
-                break;
-            case "ArrowDown":
-                $keydownV->y = -1;
-                $this->setVelocity($keydownV);
-                break;
-            case "ArrowLeft":
-                $keydownV->x = 1;
-                $this->setVelocity($keydownV);
-                break;
-            default:
+        echo $jsonMsg->key." is UP\n";
+        foreach($this->objects as $obj){
+            if(is_callable([$obj, "onKeyUp"])){
+                $obj->onKeyUp($jsonMsg);
+            }
         }
     }
 }
@@ -109,11 +67,7 @@ class MessageController implements MessageComponentInterface {
         echo "New connection! ({$conn->resourceId})\n";
     }
 
-    public function onMessage(ConnectionInterface $from, $msg) {
-        $numRecv = count($this->clients) - 1;
-        // echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
-        //     , $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
-        
+    public function onMessage(ConnectionInterface $from, $msg) {        
         $jsonMsg = json_decode($msg);
         switch($jsonMsg->app){
             case "start":

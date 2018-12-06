@@ -35,11 +35,11 @@ function connection(){
             },1000);
 
             window.addEventListener("keydown", function(ev){
-                var sendData = {"app":"keydown", "key":ev.key,};
+                var sendData = {"app":"keydown", "key":ev.keyCode,};
                 if(ev.repeat == false )connection.send(JSON.stringify(sendData));
             });
             window.addEventListener("keyup", function(ev){
-                var sendData = {"app":"keyup", "key":ev.key,};
+                var sendData = {"app":"keyup", "key":ev.keyCode,};
                 if(ev.repeat == false )connection.send(JSON.stringify(sendData));
             });
         }
@@ -63,9 +63,13 @@ function connection(){
         // 描画
         var jsonData = JSON.parse(e.data);
         ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.beginPath();
-        ctx.arc(jsonData.Pos.x, jsonData.Pos.y, 10, 0, Math.PI*2, true);
-        ctx.fill();
+        Object.keys(jsonData).forEach(function(key){
+            var objValue = jsonData[key];
+            ctx.beginPath();
+            ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+            ctx.fill();
+        })
+        
         // FPS測定
         mesCount++;
     };
