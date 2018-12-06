@@ -11,43 +11,47 @@ class UserEventListener {
     public $timer;
 
     private $objects=[];
+    private $preRenderedTime;
+    public $pressingKeys = [];
 
     public function __construct($connection){
         $this->connection = $connection;
     }
 
     public function onStart($jsonMsg){
-        $this->objects[] = new MoveableObject(["pos"=>["x"=>0,"y"=>$jsonMsg->height/2]]);
+        $this->objects[] = new MoveableObject(["pos"=>["x"=>0,"y"=>$jsonMsg->height/2], "masterObject"=>$this]);
 
         // ゲームループ
         return function() use ($jsonMsg){
             $result = [];
-            foreach($this->objects as $obj){
+            foreach($this->objects as $objKey => $obj){
                 $tmp = $obj->onUpdate($jsonMsg);
                 if($tmp != null){
                     $result[$obj->getTag()] = $obj->onUpdate($jsonMsg);
                 }
             }
             $this->connection->send(json_encode($result));
+            $preRenderedTime = time();
         };
     }
 
+    // KeyUpが呼ばれずにKeyDownが呼び出される場合があるためオブジェクトには落とし込まない。
     public function onKeyDown($jsonMsg){
-        echo $jsonMsg->key." is Down\n";
-        foreach($this->objects as $obj){
-            if(is_callable([$obj, "onKeyDown"])){
-                $obj->onKeyDown($jsonMsg);
-            }
-        }
+        $this->pressingKeys[$jsonMsg->key] = 1;
+    }
+    public function onKeyUp($jsonMsg){
+        unset($this->pressingKeys[$jsonMsg->key]);
     }
 
-    public function onKeyUp($jsonMsg){
-        echo $jsonMsg->key." is UP\n";
-        foreach($this->objects as $obj){
-            if(is_callable([$obj, "onKeyUp"])){
-                $obj->onKeyUp($jsonMsg);
-            }
-        }
+    public function addObject($obj){
+        $this->objects[$obj->getTag()] = $obj;
+    }
+    public function removeObject($tag){
+        unset($this->objects[$tag]);
+    }
+
+    public function getPreRenderedTime(){
+        return $this->preRenderedTime;
     }
 }
 

@@ -2,6 +2,16 @@
 <head>
 <title>test</title>
 <script>
+    var keydown={};
+var keyup={};
+    function check(){
+            var err = [];             
+            	Object.keys(keydown).forEach(function(key){
+            	if(keydown[key]!=keyup[key])err.push(key+"|down:"+keydown[key]+",up:"+keyup[key])
+            	})
+            return err;
+            }
+
 function connection(){
     var canvas =  document.getElementById("canvas");
     var ctx = canvas.getContext('2d');
@@ -34,13 +44,24 @@ function connection(){
                 }
             },1000);
 
+
             window.addEventListener("keydown", function(ev){
                 var sendData = {"app":"keydown", "key":ev.keyCode,};
-                if(ev.repeat == false )connection.send(JSON.stringify(sendData));
+                if(!keydown[ev.keyCode])keydown[ev.keyCode]=0;
+
+                if(ev.repeat == false ){
+                    keydown[ev.keyCode]++;
+                    connection.send(JSON.stringify(sendData));
+                }
             });
             window.addEventListener("keyup", function(ev){
                 var sendData = {"app":"keyup", "key":ev.keyCode,};
-                if(ev.repeat == false )connection.send(JSON.stringify(sendData));
+                if(!keyup[ev.keyCode])keyup[ev.keyCode]=0;
+
+                if(ev.repeat == false ){
+                    keyup[ev.keyCode]++;
+                    connection.send(JSON.stringify(sendData));
+                }
             });
         }
     };
@@ -66,7 +87,13 @@ function connection(){
         Object.keys(jsonData).forEach(function(key){
             var objValue = jsonData[key];
             ctx.beginPath();
-            ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+            switch(objValue["shape"]){
+                case "normalBullet":
+                    ctx.arc(objValue.pos.x, objValue.pos.y, 2, 0, Math.PI*2, true);
+                    break;
+                default:
+                    ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+            }
             ctx.fill();
         })
         

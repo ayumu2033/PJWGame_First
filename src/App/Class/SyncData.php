@@ -7,7 +7,7 @@ class SyncData{
 
     public function __construct($val){
         $this->data = $val;
-        $this->timestamp = time();
+        $this->timestamp = microtime(true);
     }
 
     public function Get(){
@@ -15,7 +15,7 @@ class SyncData{
     }
     public function Set($val, $time){
         if($time == null || $time !== $this->timestamp){
-            $time = time();
+            $time = microtime(true);
         }
         if($time >= $this->timestamp){
             $this->data = $val;
