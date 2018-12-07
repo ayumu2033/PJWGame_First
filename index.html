@@ -2,15 +2,6 @@
 <head>
 <title>test</title>
 <script>
-    var keydown={};
-var keyup={};
-    function check(){
-            var err = [];             
-            	Object.keys(keydown).forEach(function(key){
-            	if(keydown[key]!=keyup[key])err.push(key+"|down:"+keydown[key]+",up:"+keyup[key])
-            	})
-            return err;
-            }
 
 function connection(){
     var canvas =  document.getElementById("canvas");
@@ -20,54 +11,63 @@ function connection(){
     var fpsIntervalId;
     var mesCount = 0;
 
-    connection = new WebSocket('ws://127.0.0.1:8080');
+    var connection;
+
+    try{
+        connection = new WebSocket('ws://127.0.0.1:8080');
+    }catch(e){
+        console.log(e);
+        return;
+    }
+
     connection.onopen = function(e) {
         document.getElementById("connection").disabled= true;
         console.log("Connection established!");
 
-        var startButton = document.getElementById("start");
-        startButton.attributes.removeNamedItem("disabled");
-        startButton.onclick = function(){
-            connection.send(JSON.stringify({"app":"start","width":canvas.width,"height":canvas.height}));
-            startButton.disabled= true;
+        connection.send(JSON.stringify({"app":"start","width":canvas.width,"height":canvas.height}));
 
-            // FPS測定
-            var preTime_fps=(new Date).getTime();
-            var fpsElem = document.getElementById("FPS");
-            fpsIntervalId = setInterval(function(){
-                var now = (new Date).getTime();
-                var div = now - preTime_fps;
-                if(div >= 1000){
-                    fpsElem.textContent = "FPS:" + parseInt(1000 / (div / mesCount ));
-                    mesCount = 0;
-                    preTime_fps = now;
-                }
-            },1000);
+        // FPS測定
+        var preTime_fps=(new Date).getTime();
+        var fpsElem = document.getElementById("FPS");
+        fpsIntervalId = setInterval(function(){
+            var now = (new Date).getTime();
+            var div = now - preTime_fps;
+            if(div >= 1000){
+                fpsElem.textContent = "FPS:" + parseInt(1000 / (div / mesCount ));
+                mesCount = 0;
+                preTime_fps = now;
+            }
+        },1000);
 
-
-            window.addEventListener("keydown", function(ev){
+        var keydownListener = function(ev){
+            if(connection.readyState == 1){
                 var sendData = {"app":"keydown", "key":ev.keyCode,};
-                if(!keydown[ev.keyCode])keydown[ev.keyCode]=0;
-
                 if(ev.repeat == false ){
-                    keydown[ev.keyCode]++;
                     connection.send(JSON.stringify(sendData));
                 }
-            });
-            window.addEventListener("keyup", function(ev){
-                var sendData = {"app":"keyup", "key":ev.keyCode,};
-                if(!keyup[ev.keyCode])keyup[ev.keyCode]=0;
-
-                if(ev.repeat == false ){
-                    keyup[ev.keyCode]++;
-                    connection.send(JSON.stringify(sendData));
-                }
-            });
+            }else if(connection.readyState == 2 || connection.readyState == 3){
+                // closeing and closed
+                window.removeEventListener("keydown", keydownListener);
+            }
         }
+        window.addEventListener("keydown", keydownListener);
+        var keyupListener = function(ev){
+            if(connection.readyState == 1){
+                var sendData = {"app":"keyup", "key":ev.keyCode,};
+                if(ev.repeat == false ){
+                    connection.send(JSON.stringify(sendData));
+                }
+            }else if(connection.readyState == 2 || connection.readyState == 3){
+                // closeing and closed
+                window.removeEventListener("keyup", keyupListener);
+            }
+        }
+        window.addEventListener("keyup", keyupListener);
     };
 
     connection.onerror = function(e){
         console.log(e);
+        document.getElementById("connection").disabled= false;
     }
 
     var preTime=(new Date).getTime();
@@ -103,20 +103,22 @@ function connection(){
 
     connection.onclose = function(e) {
         console.log(e.data);
+        document.getElementById("connection").disabled= false;
     };
 }
 window.onload=function(){
     var canvas = document.getElementById("canvas");
     canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
 }
+
 </script>
 </head>
 <body>
-<button id="connection" onclick="connection()">connection</button>
-<button id="start" disabled >start</button>
+<button id="connection" onclick="connection()">START</button>
 <span id="FPS">FPS:</span>
-<div style="border:1px solid black;width:600px;margin-top:1em">
-    <canvas id="canvas" ></canvas>
+<div style="border:1px solid black;height:400px;width:600px;margin-top:1em;margin:auto">
+    <canvas id="canvas"></canvas>
 </div>
 </body>
 </html>
