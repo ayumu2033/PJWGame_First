@@ -10,8 +10,10 @@ function connection(){
 
     var fpsIntervalId;
     var mesCount = 0;
+    var drawCount = 0;
 
     var connection;
+    var DrawObjects;
 
     try{
         connection = new WebSocket('ws://127.0.0.1:8080');
@@ -33,12 +35,44 @@ function connection(){
             var now = (new Date).getTime();
             var div = now - preTime_fps;
             if(div >= 1000){
-                fpsElem.textContent = "FPS:" + parseInt(1000 / (div / mesCount ));
+                fpsElem.textContent = "Message/Sec:" + parseInt(1000 / (div / mesCount ))
+                                        + ", Frame/Sec:" + parseInt(1000 / (div / drawCount ));
                 mesCount = 0;
+                drawCount = 0;
                 preTime_fps = now;
+            }
+            if(connection.readyState == 2 || connection.readyState == 3){
+                // closeing and closed
+                clearInterval(fpsIntervalId);
             }
         },1000);
 
+
+        // 描画
+        canvasIntervalId = setInterval(function(){
+            if(connection.readyState == 2 || connection.readyState == 3){
+                // closeing and closed
+                clearInterval(canvasIntervalId);
+            }
+            if(DrawObjects == null) return;
+
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            Object.keys(DrawObjects).forEach(function(key){
+                var objValue = DrawObjects[key];
+                ctx.beginPath();
+                switch(objValue["shape"]){
+                    case "normalBullet":
+                        ctx.arc(objValue.pos.x, objValue.pos.y, 2, 0, Math.PI*2, true);
+                        break;
+                    default:
+                        ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+                }
+                ctx.fill();
+            })
+            drawCount++;
+        },16);
+        // 1000(mSec) / 60(Frame) = 16.66...
+        
         var keydownListener = function(ev){
             if(connection.readyState == 1){
                 var sendData = {"app":"keydown", "key":ev.keyCode,};
@@ -70,33 +104,8 @@ function connection(){
         document.getElementById("connection").disabled= false;
     }
 
-    var preTime=(new Date).getTime();
-
     connection.onmessage = function(e) {
-        var now = (new Date).getTime();
-        var div = now - preTime;
-        // FPS制限
-        if(div < 15){
-            return;
-        }
-        preTime = now;
-
-        // 描画
-        var jsonData = JSON.parse(e.data);
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        Object.keys(jsonData).forEach(function(key){
-            var objValue = jsonData[key];
-            ctx.beginPath();
-            switch(objValue["shape"]){
-                case "normalBullet":
-                    ctx.arc(objValue.pos.x, objValue.pos.y, 2, 0, Math.PI*2, true);
-                    break;
-                default:
-                    ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
-            }
-            ctx.fill();
-        })
-        
+        DrawObjects = JSON.parse(e.data);
         // FPS測定
         mesCount++;
     };

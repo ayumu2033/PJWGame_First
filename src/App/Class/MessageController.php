@@ -19,7 +19,8 @@ class UserEventListener {
     }
 
     public function onStart($jsonMsg){
-        $this->objects[] = new MoveableObject(["pos"=>["x"=>0,"y"=>$jsonMsg->height/2], "masterObject"=>$this]);
+        $this->addObject(new Player(["pos"=>["x"=>0,"y"=>$jsonMsg->height/2], "masterObject"=>$this]));
+        $this->addObject(new MoveableObject(["pos"=>["x"=>300,"y"=>$jsonMsg->height/2], "masterObject"=>$this]));
 
         // ゲームループ
         return function() use ($jsonMsg){
