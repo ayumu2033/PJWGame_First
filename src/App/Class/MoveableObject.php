@@ -8,7 +8,8 @@ class MoveableObject{
     protected $masterObject;
     private $label;
     private $hitLeyer;
-    private $radius;
+    protected $radius;
+    protected $view;
 
     public function __construct($args){
         if($args != null){
@@ -35,8 +36,8 @@ class MoveableObject{
             if(array_key_exists("hitLayer", $args)){
                 $this->hitLayer =  $args["hitLayer"];
             }
-            if(array_key_exists("radius", $args)){
-                $this->radius =  $args["radius"];
+            if(array_key_exists("view", $args)){
+                $this->view =  $args["view"];
             }
         }
         $this->tag = md5(uniqid(rand(),1));
@@ -47,7 +48,7 @@ class MoveableObject{
         $nowY = $this->pos->Get()->y + $this->velocity->Get()->y;
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
 
-        return ["pos"=>["x"=>$nowX, "y"=>$nowY]];
+        return ["pos"=>["x"=>$nowX, "y"=>$nowY], "view"=>$this->view];
     }
 
     public function getTag(){

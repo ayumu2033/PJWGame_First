@@ -60,14 +60,26 @@ function connection(){
             ctx.clearRect(0,0,canvas.width,canvas.height);
             Object.keys(DrawObjects).forEach(function(key){
                 var objValue = DrawObjects[key];
-                ctx.beginPath();
-                switch(objValue["shape"]){
-                    case "normalBullet":
+                switch(objValue["view"]){
+                    case "PlayerBullet":
+                        ctx.beginPath();
                         ctx.arc(objValue.pos.x, objValue.pos.y, 1, 0, Math.PI*2, true);
                         ctx.stroke();
                         ctx.closePath();
                         break;
+                    case "Player":
+                        var preFillStyle = ctx.fillStyle;
+                        ctx.beginPath();
+                        ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+                        ctx.fill();
+                        ctx.fillStyle = "red";
+                        ctx.beginPath();
+                        ctx.arc(objValue.pos.x, objValue.pos.y, 5, 0, Math.PI*2, true);
+                        ctx.fill();
+                        ctx.fillStyle = preFillStyle;
+                        break;
                     default:
+                        ctx.beginPath();
                         ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
                         ctx.fill();
                 }

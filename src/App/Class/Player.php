@@ -3,6 +3,7 @@ namespace MyApp;
 
 class Player extends MoveableObject{
     private $preBulletShootTime;
+    protected $radius = 5;
 
     public function __construct($args){
         parent::__construct($args);
@@ -38,7 +39,7 @@ class Player extends MoveableObject{
                     "shape"=>"normalBullet",
                     "masterObject"=>$this->masterObject,
                     "label"=>"PlayerBullet",
-                    "radius"=>1,
+                    "view"=> "PlayerBullet",
                     ]));
                 $this->preBulletShootTime = microtime(true);
             }
@@ -50,7 +51,7 @@ class Player extends MoveableObject{
         $nowY = $nowY > $jsonMsg->height ? $jsonMsg->height : ($nowY < 0 ? 0 : $nowY);
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
 
-        return ["pos"=>["x"=>$nowX, "y"=>$nowY]];
+        return ["pos"=>["x"=>$nowX, "y"=>$nowY], "view"=>$this->view];
     }
 
     public function onHit($targetObj){

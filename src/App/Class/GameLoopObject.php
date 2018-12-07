@@ -27,12 +27,14 @@ class GameLoopObject {
             "pos"=>["x"=>0,"y"=>$jsonMsg->height/2],
             "masterObject"=>$this,
             "label"=>"Player",
-            "radius"=>20 ]));
+            "view"=> "Player",
+            ]));
         $this->addObject(new Enemy([
             "pos"=>["x"=>300,"y"=>$jsonMsg->height/2],
             "masterObject"=>$this,
             "label"=>"Enemy",
-            "radius"=>20]));
+            "view"=> "Enemy",
+            ]));
 
         // ゲームループ
         return function() use ($jsonMsg){

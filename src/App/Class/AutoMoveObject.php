@@ -3,6 +3,8 @@ namespace MyApp;
 
 class AutoMoveObject extends MoveableObject{
     private $shape;
+    protected $radius = 1;
+
     public function __construct($args){
         parent::__construct($args);
         if($args != null){
@@ -19,7 +21,7 @@ class AutoMoveObject extends MoveableObject{
             $this->masterObject->removeObject($this->getTag());
         }
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
-        return ["pos"=>["x"=>$nowX, "y"=>$nowY], "shape" => $this->shape];
+        return ["pos"=>["x"=>$nowX, "y"=>$nowY], "shape" => $this->shape, "view"=>$this->view];
     }
 
     public function onHit($targetObj){
