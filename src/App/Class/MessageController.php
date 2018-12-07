@@ -4,58 +4,6 @@ use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use React\EventLoop\LoopInterface;
 
-class UserEventListener {
-    public const WAITTIME = 0.0075;
-
-    public $connection;
-    public $timer;
-
-    private $objects=[];
-    private $preRenderedTime;
-    public $pressingKeys = [];
-
-    public function __construct($connection){
-        $this->connection = $connection;
-    }
-
-    public function onStart($jsonMsg){
-        $this->addObject(new Player(["pos"=>["x"=>0,"y"=>$jsonMsg->height/2], "masterObject"=>$this]));
-        $this->addObject(new MoveableObject(["pos"=>["x"=>300,"y"=>$jsonMsg->height/2], "masterObject"=>$this]));
-
-        // ゲームループ
-        return function() use ($jsonMsg){
-            $result = [];
-            foreach($this->objects as $objKey => $obj){
-                $tmp = $obj->onUpdate($jsonMsg);
-                if($tmp != null){
-                    $result[$obj->getTag()] = $obj->onUpdate($jsonMsg);
-                }
-            }
-            $this->connection->send(json_encode($result));
-            $preRenderedTime = time();
-        };
-    }
-
-    // KeyUpが呼ばれずにKeyDownが呼び出される場合があるためオブジェクトには落とし込まない。
-    public function onKeyDown($jsonMsg){
-        $this->pressingKeys[$jsonMsg->key] = 1;
-    }
-    public function onKeyUp($jsonMsg){
-        unset($this->pressingKeys[$jsonMsg->key]);
-    }
-
-    public function addObject($obj){
-        $this->objects[$obj->getTag()] = $obj;
-    }
-    public function removeObject($tag){
-        unset($this->objects[$tag]);
-    }
-
-    public function getPreRenderedTime(){
-        return $this->preRenderedTime;
-    }
-}
-
 class MessageController implements MessageComponentInterface {
     protected $clients;
     private $loop;
@@ -77,8 +25,8 @@ class MessageController implements MessageComponentInterface {
         switch($jsonMsg->app){
             case "start":
                 echo "start\n";
-                $eventListener = new UserEventListener($from);
-                $eventListener->timer = $this->loop->addPeriodicTimer(UserEventListener::WAITTIME, $eventListener->onStart($jsonMsg) );
+                $eventListener = new GameLoopObject($from);
+                $eventListener->timer = $this->loop->addPeriodicTimer(GameLoopObject::WAITTIME, $eventListener->onStart($jsonMsg) );
                 $this->clients->offsetSet($from, $eventListener);
                 break;
             case "keydown":

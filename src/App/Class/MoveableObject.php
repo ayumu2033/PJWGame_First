@@ -6,6 +6,9 @@ class MoveableObject{
     protected $velocity;
     private $tag;
     protected $masterObject;
+    private $label;
+    private $hitLeyer;
+    private $radius;
 
     public function __construct($args){
         if($args != null){
@@ -26,15 +29,22 @@ class MoveableObject{
             if(array_key_exists("masterObject", $args)){
                 $this->masterObject =  $args["masterObject"];
             }
+            if(array_key_exists("label", $args)){
+                $this->label =  $args["label"];
+            }
+            if(array_key_exists("hitLayer", $args)){
+                $this->hitLayer =  $args["hitLayer"];
+            }
+            if(array_key_exists("radius", $args)){
+                $this->radius =  $args["radius"];
+            }
         }
         $this->tag = md5(uniqid(rand(),1));
     }
 
     public function onUpdate($jsonMsg){
         $nowX = $this->pos->Get()->x + $this->velocity->Get()->x;
-        $nowX = $nowX > $jsonMsg->width ? $jsonMsg->width : ($nowX < 0 ? 0 : $nowX);
         $nowY = $this->pos->Get()->y + $this->velocity->Get()->y;
-        $nowY = $nowY > $jsonMsg->height ? $jsonMsg->height : ($nowY < 0 ? 0 : $nowY);
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
 
         return ["pos"=>["x"=>$nowX, "y"=>$nowY]];
@@ -42,6 +52,16 @@ class MoveableObject{
 
     public function getTag(){
         return $this->tag;
+    }
+    public function getLabel(){
+        return $this->label;
+    }
+
+    public function getPos(){
+        return $this->pos;
+    }
+    public function getRadius(){
+        return $this->radius;
     }
 
 }

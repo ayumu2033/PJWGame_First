@@ -7,6 +7,7 @@ function connection(){
     var canvas =  document.getElementById("canvas");
     var ctx = canvas.getContext('2d');
     ctx.fillStyle = "black";
+    ctx.lineWidth = 1;
 
     var fpsIntervalId;
     var mesCount = 0;
@@ -62,17 +63,19 @@ function connection(){
                 ctx.beginPath();
                 switch(objValue["shape"]){
                     case "normalBullet":
-                        ctx.arc(objValue.pos.x, objValue.pos.y, 2, 0, Math.PI*2, true);
+                        ctx.arc(objValue.pos.x, objValue.pos.y, 1, 0, Math.PI*2, true);
+                        ctx.stroke();
+                        ctx.closePath();
                         break;
                     default:
                         ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+                        ctx.fill();
                 }
-                ctx.fill();
             })
             drawCount++;
         },16);
         // 1000(mSec) / 60(Frame) = 16.66...
-        
+
         var keydownListener = function(ev){
             if(connection.readyState == 1){
                 var sendData = {"app":"keydown", "key":ev.keyCode,};

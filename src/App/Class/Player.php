@@ -37,12 +37,20 @@ class Player extends MoveableObject{
                     "pos"=>["x"=>$this->pos->Get()->x+5,"y"=>$this->pos->Get()->y],
                     "velocity"=>["x"=>2],
                     "shape"=>"normalBullet",
-                    "masterObject"=>$this->masterObject
+                    "masterObject"=>$this->masterObject,
+                    "label"=>"PlayerBullet",
+                    "radius"=>1,
                     ]));
                 $this->preBulletShootTime = microtime(true);
             }
         }
 
-        return parent::onUpdate($jsonMsg);;
+        $nowX = $this->pos->Get()->x + $this->velocity->Get()->x;
+        $nowX = $nowX > $jsonMsg->width ? $jsonMsg->width : ($nowX < 0 ? 0 : $nowX);
+        $nowY = $this->pos->Get()->y + $this->velocity->Get()->y;
+        $nowY = $nowY > $jsonMsg->height ? $jsonMsg->height : ($nowY < 0 ? 0 : $nowY);
+        $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
+
+        return ["pos"=>["x"=>$nowX, "y"=>$nowY]];
     }
 }
