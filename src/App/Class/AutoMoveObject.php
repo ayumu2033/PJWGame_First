@@ -21,4 +21,8 @@ class AutoMoveObject extends MoveableObject{
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
         return ["pos"=>["x"=>$nowX, "y"=>$nowY], "shape" => $this->shape];
     }
+
+    public function onHit($targetObj){
+        $this->masterObject->removeObject($this->getTag());
+    }
 }

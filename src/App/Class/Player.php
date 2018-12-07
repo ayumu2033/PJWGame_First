@@ -3,7 +3,6 @@ namespace MyApp;
 
 class Player extends MoveableObject{
     private $preBulletShootTime;
-    private $pressingKeys=[];
 
     public function __construct($args){
         parent::__construct($args);
@@ -52,5 +51,9 @@ class Player extends MoveableObject{
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
 
         return ["pos"=>["x"=>$nowX, "y"=>$nowY]];
+    }
+
+    public function onHit($targetObj){
+        $this->masterObject->removeObject($this->getTag());
     }
 }

@@ -28,7 +28,7 @@ class GameLoopObject {
             "masterObject"=>$this,
             "label"=>"Player",
             "radius"=>20 ]));
-        $this->addObject(new MoveableObject([
+        $this->addObject(new Enemy([
             "pos"=>["x"=>300,"y"=>$jsonMsg->height/2],
             "masterObject"=>$this,
             "label"=>"Enemy",
@@ -50,7 +50,7 @@ class GameLoopObject {
                             $obj_1_pos = $obj->getPos()->Get();
                             $distance = ($obj_2_pos->x - $obj_1_pos->x) ** 2 + ($obj_2_pos->y - $obj_1_pos->y) ** 2;
                             if($distance < $obj->getRadius()**2 || $distance < $targetObject->getRadius()**2){
-                                echo "hit";
+                                $obj->onHit($targetObject);
                             }
                         }
                     }
