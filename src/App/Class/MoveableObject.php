@@ -10,6 +10,7 @@ class MoveableObject{
     private $hitLeyer;
     protected $radius;
     protected $view;
+    protected $collisionType = "Circle";
 
     public function __construct($args){
         if($args != null){
@@ -65,4 +66,11 @@ class MoveableObject{
         return $this->radius;
     }
 
+    public function getCollisionType(){
+        return $this->collisionType;
+    }
+
+    public function onHit($targetObject){
+        $this->masterObject->removeObject($this->getTag());
+    }
 }

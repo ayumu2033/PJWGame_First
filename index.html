@@ -78,6 +78,22 @@ function connection(){
                         ctx.fill();
                         ctx.fillStyle = preFillStyle;
                         break;
+                    case "Enemy":
+                        ctx.beginPath();
+                        ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+                        ctx.fill();
+                        break;
+                    case "Polygon":
+                        ctx.beginPath();
+                        var firstPoint = objValue.polygon[0];
+                        ctx.moveTo(firstPoint.x, firstPoint.y);
+                        objValue.polygon.forEach(function(v){
+                            ctx.lineTo(v.x, v.y);
+                        })
+                        ctx.lineTo(firstPoint.x, firstPoint.y);
+                        ctx.stroke();
+                        ctx.closePath();
+                        break;
                     default:
                         ctx.beginPath();
                         ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);

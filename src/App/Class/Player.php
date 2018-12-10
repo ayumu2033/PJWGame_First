@@ -53,8 +53,9 @@ class Player extends MoveableObject{
 
         return ["pos"=>["x"=>$nowX, "y"=>$nowY], "view"=>$this->view];
     }
-
-    public function onHit($targetObj){
-        $this->masterObject->removeObject($this->getTag());
+    public function onHit($targetObject){
+        parent::onHit($targetObject);
+        $this->masterObject->onDeth();
     }
+
 }

@@ -1,0 +1,95 @@
+<html>
+<head>
+<title>test</title>
+<script>
+var canvas;
+window.onload=function(){
+    var canvas = document.getElementById("canvas");
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+    var ctx = canvas.getContext("2d");
+    var Rect = canvas.getBoundingClientRect();
+    var Line = [{"x":180,"y":90},{"x":90,"y":90}];
+    canvas.addEventListener("mousemove",function(ev){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var mousex = ev.clientX - Rect.left;
+        var mousey = ev.clientY - Rect.top;
+        ctx.beginPath();
+        ctx.arc(mousex, mousey, 20, 0, 2*Math.PI);
+        ctx.stroke();
+        ctx.closePath();
+
+
+        ctx.beginPath();
+        ctx.moveTo(Line[0].x, Line[0].y);
+        ctx.lineTo(Line[1].x, Line[1].y);
+        ctx.stroke();
+
+        console.log()
+    })
+    var radius = 20;
+    canvas.addEventListener("click",function(ev){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var mousex = ev.clientX - Rect.left;
+        var mousey = ev.clientY - Rect.top;
+        ctx.beginPath();
+        ctx.arc(mousex, mousey, radius, 0, 2*Math.PI);
+        ctx.stroke();
+        ctx.closePath();
+
+        // DivLine
+        ctx.beginPath();
+        ctx.moveTo(Line[0].x, Line[0].y);
+        ctx.lineTo(Line[1].x, Line[1].y);
+        ctx.stroke();
+        ctx.closePath();
+
+        // VectorA
+        var VecA = {"x":mousex -Line[0].x,"y":mousey - Line[0].y };
+        ctx.beginPath();
+        ctx.moveTo(Line[0].x, Line[0].y);
+        ctx.lineTo(Line[0].x + VecA.x, Line[0].y + VecA.y);
+        ctx.stroke();
+        ctx.closePath();
+
+        // VectorB
+        var VecB = {"x":mousex -Line[1].x,"y":mousey - Line[1].y };
+        ctx.beginPath();
+        ctx.moveTo(Line[1].x, Line[1].y);
+        ctx.lineTo(Line[1].x + VecB.x, Line[1].y + VecB.y);
+        ctx.stroke();
+        ctx.closePath();
+
+        // 円と線分の距離
+        var VecOP = {"x":Line[1].x-Line[0].x,"y":Line[1].y-Line[0].y};
+        var div = Math.pow(VecA.x*VecOP.y-VecA.y*VecOP.x, 2) / (Math.pow(Line[1].x - Line[0].x, 2) + Math.pow(Line[1].y - Line[0].y, 2));//外積 / 線分の大きさ
+        // console.log(div);
+        if(div > radius*radius ){
+            console.log("NO HIT");
+        }else{// <= radius^2
+            // 内積をしてcosθの符号を取得、両方とも鈍角なら当たらない。A.S, B.S
+            if((VecA.x*VecOP.x + VecA.y*VecOP.y) * (VecB.x*VecOP.x + VecB.y*VecOP.y) <= 0){
+                console.log("HIT");
+            }else{
+                if(radius*radius > VecA.x * VecA.x + VecA.y * VecA.y || radius*radius > VecB.x * VecB.x + VecB.y * VecB.y){
+                    console.log("HIT");
+                }else{
+                    console.log("NO HIT");
+                }
+            }
+        }
+    })
+}
+
+
+
+</script>
+</head>
+<body>
+<button onclick="connection()">START</button>
+<span id="FPS">FPS:</span>
+<div style="border:1px solid black;height:400px;width:600px;margin-top:1em;margin:auto">
+    <canvas id="canvas"></canvas>
+</div>
+</body>
+</html>
