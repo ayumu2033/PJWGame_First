@@ -14,6 +14,7 @@ class GameLoopObject {
     private $objects=[];
     private $removedObjectTags=[];
     private $preRenderedTime;
+    private $renderedTime;
     
     private $hitLayer = [
         "Player" => ["Enemy", "EnemyBullet", "Ground"],
@@ -63,8 +64,10 @@ class GameLoopObject {
             "view"=> "Polygon",
             ]));
 
-        // ゲームループ
+            $this->preRenderedTime = microtime(true);
+            // ゲームループ
         return function() use ($jsonMsg){
+            $this->renderedTime = microtime(true);
             // あたり判定
             $labelGroup = [];
             foreach($this->objects as $objKey => $obj){
@@ -104,7 +107,7 @@ class GameLoopObject {
                 $this->connection->send(json_encode($result));
             }
             $this->removedObjectTags = [];
-            $this->preRenderedTime = time();
+            $this->preRenderedTime = $this->renderedTime;
         };
     }
 
@@ -124,8 +127,8 @@ class GameLoopObject {
         $this->removedObjectTags[] = $tag;
     }
 
-    public function getPreRenderedTime(){
-        return $this->preRenderedTime;
+    public function getDeltaTime(){
+        return $this->renderedTime - $this->preRenderedTime;
     }
 
     public function collisionDetection($obj_1, $obj_2){
@@ -161,21 +164,24 @@ class GameLoopObject {
                         $isContain = false;
                     }
                 }else{
+                    //　内包判定は全部半径より大きい場合のみ
+                    $isContain = false;
                     $vecB = ["x"=>$circlePos->x - $line[1]["x"], "y"=>$circlePos->y - $line[1]["y"]];
                     if(($vecA["x"]*$vecLine["x"] + $vecA["y"]*$vecLine["y"]) * ($vecB["x"]*$vecLine["x"] + $vecB["y"]*$vecLine["y"]) <= 0){
-                        $hitFlag = $hitFlag || true;
+                        $hitFlag = true;
                     }else{
                         // 内積をしてcosθの符号を取得、両方とも鈍角なら当たらない。A.S, B.S
                         if($circleObj->getRadius()**2 > $vecA["x"]*$vecA["x"] + $vecA["y"]*$vecA["y"]
                             || $circleObj->getRadius()**2 > $vecB["x"]*$vecB["x"] + $vecB["y"]*$vecB["y"]){
                                 // 半径より短ければ当たる
-                                $hitFlag = $hitFlag || true;
+                                $hitFlag = true;
                         }else{
                             $hitFlag = $hitFlag || false;
                         }
                     }
                 }
             }
+
             return $hitFlag || $isContain;
         }else{
             //no Circle

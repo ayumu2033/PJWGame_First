@@ -15,8 +15,8 @@ class AutoMoveObject extends MoveableObject{
     }
 
     public function onUpdate($jsonMsg){
-        $nowX = $this->pos->Get()->x + $this->velocity->Get()->x;
-        $nowY = $this->pos->Get()->y + $this->velocity->Get()->y;
+        $nowX = $this->pos->Get()->x + $this->velocity->Get()->x * $this->masterObject->getDeltaTime();
+        $nowY = $this->pos->Get()->y + $this->velocity->Get()->y * $this->masterObject->getDeltaTime();
         if($nowX > $jsonMsg->width){
             $this->masterObject->removeObject($this->getTag());
         }

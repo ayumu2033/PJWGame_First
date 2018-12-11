@@ -4,7 +4,7 @@ namespace MyApp;
 class Player extends MoveableObject{
     private $preBulletShootTime;
     protected $radius = 5;
-    private $speed = 2;
+    private $speed = 200;
 
     public function __construct($args){
         parent::__construct($args);
@@ -30,8 +30,10 @@ class Player extends MoveableObject{
             $newV->x -=1;
         }
         if($newV->x != 0 || $newV->y != 0){
-            $newV->x = $newV->x / sqrt($newV->x**2 + $newV->y**2) * $this->speed;
-            $newV->y = $newV->y / sqrt($newV->x**2 + $newV->y**2) * $this->speed;
+            $size = sqrt($newV->x**2 + $newV->y**2);
+            $newV->x = $newV->x / $size * $this->speed;
+            $newV->y = $newV->y / $size * $this->speed;
+            $this->is_dirty = true;
         }
         $this->velocity->Set($newV, null);
 
@@ -40,7 +42,7 @@ class Player extends MoveableObject{
             if($this->preBulletShootTime == null || $this->preBulletShootTime + 0.25  < microtime(true)){
                 $this->masterObject->addObject(new AutoMoveObject([
                     "pos"=>["x"=>$this->pos->Get()->x+5,"y"=>$this->pos->Get()->y],
-                    "velocity"=>["x"=>3],
+                    "velocity"=>["x"=>$jsonMsg->width],
                     "shape"=>"normalBullet",
                     "masterObject"=>$this->masterObject,
                     "label"=>"PlayerBullet",
@@ -50,13 +52,17 @@ class Player extends MoveableObject{
             }
         }
 
-        $nowX = $this->pos->Get()->x + $this->velocity->Get()->x;
+        $nowX = $this->pos->Get()->x + $this->velocity->Get()->x * $this->masterObject->getDeltaTime();
         $nowX = $nowX > $jsonMsg->width ? $jsonMsg->width : ($nowX < 0 ? 0 : $nowX);
-        $nowY = $this->pos->Get()->y + $this->velocity->Get()->y;
+        $nowY = $this->pos->Get()->y + $this->velocity->Get()->y * $this->masterObject->getDeltaTime();
         $nowY = $nowY > $jsonMsg->height ? $jsonMsg->height : ($nowY < 0 ? 0 : $nowY);
 
         if($nowX == $this->pos->Get()->x && $nowY == $this->pos->Get()->y){
-            return false || parent::onUpdate($jsonMsg);
+            if($this->is_dirty == true){
+                $this->is_dirty = false;
+                return true;
+            }
+            return false;
         }
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
 

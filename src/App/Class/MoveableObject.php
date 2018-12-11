@@ -20,8 +20,8 @@ class MoveableObject extends gameObject{
     }
 
     public function onUpdate($jsonMsg){
-        $nowX = $this->pos->Get()->x + $this->velocity->Get()->x;
-        $nowY = $this->pos->Get()->y + $this->velocity->Get()->y;
+        $nowX = $this->pos->Get()->x + $this->velocity->Get()->x * $this->masterObject->getDeltaTime();
+        $nowY = $this->pos->Get()->y + $this->velocity->Get()->y * $this->masterObject->getDeltaTime();
 
         if($nowX == $this->pos->Get()->x && $nowY == $this->pos->Get()->y){
             return false || parent::onUpdate($jsonMsg);
