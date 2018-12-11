@@ -9,21 +9,23 @@ class GameLoopObject {
 
     public $connection;
     public $timer;
+    public $pressingKeys = [];
 
     private $objects=[];
+    private $removedObjectTags=[];
     private $preRenderedTime;
-    public $pressingKeys = [];
+    
     private $hitLayer = [
         "Player" => ["Enemy", "EnemyBullet", "Ground"],
         "Enemy" => ["PlayerBullet", "Player"],
         "PlayerBullet" => ["Enemy", "EnemyBullet", "Ground"],
         "Ground" => ["Enemy", "EnemyBullet", "Player"],
     ];
+    private $canvasHeight;
+
     public function __construct($connection){
         $this->connection = $connection;
     }
-
-    private $canvasHeight;
 
     public function onDeth(){
         $this->addObject(new Player([
@@ -63,7 +65,7 @@ class GameLoopObject {
 
         // ゲームループ
         return function() use ($jsonMsg){
-            $result = [];
+            // あたり判定
             $labelGroup = [];
             foreach($this->objects as $objKey => $obj){
                 $labelGroup[$obj->getLabel()][] = $obj;
@@ -85,14 +87,24 @@ class GameLoopObject {
                     }
                 }
             }
+
+            $result = [];
+            $result["update"] = [];
+
+            // アップデート
             foreach($this->objects as $objKey => $obj){
-                $tmp = $obj->onUpdate($jsonMsg);
-                if($tmp != null){
-                    $result[$obj->getTag()] = $obj->onUpdate($jsonMsg);
+                if($obj->onUpdate($jsonMsg)){
+                    $result["update"][$obj->getTag()] = $obj->getParams();
                 }
             }
-            $this->connection->send(json_encode($result));
-            $preRenderedTime = time();
+
+            $result["remove"] = (array)$this->removedObjectTags;
+            // 更新の送信
+            if(count($result["update"]) > 0 || count($result["remove"]) > 0){
+                $this->connection->send(json_encode($result));
+            }
+            $this->removedObjectTags = [];
+            $this->preRenderedTime = time();
         };
     }
 
@@ -109,6 +121,7 @@ class GameLoopObject {
     }
     public function removeObject($tag){
         unset($this->objects[$tag]);
+        $this->removedObjectTags[] = $tag;
     }
 
     public function getPreRenderedTime(){

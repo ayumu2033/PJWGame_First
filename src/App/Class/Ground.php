@@ -1,7 +1,7 @@
 <?php
 namespace MyApp;
 
-class Ground extends MoveableObject{
+class Ground extends gameObject{
     private $polygon;
     protected $collisionType = "Polygon";
 
@@ -14,8 +14,10 @@ class Ground extends MoveableObject{
         }
     }
 
-    public function onUpdate($jsonMsg){
-        return ["pos"=>$this->pos->Get(), "view"=>$this->view, "polygon"=>$this->polygon];
+    public function getParams(){
+        $result = parent::getParams();
+        $result["polygon"] = $this->polygon;
+        return $result;
     }
 
     public function getCollisionLines(){

@@ -21,7 +21,13 @@ class AutoMoveObject extends MoveableObject{
             $this->masterObject->removeObject($this->getTag());
         }
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
-        return ["pos"=>["x"=>$nowX, "y"=>$nowY], "shape" => $this->shape, "view"=>$this->view];
+        return true;
+    }
+
+    public function getParams(){
+        $result = parent::getParams();
+        $result["shape"] = $this->shape;
+        return $result;
     }
 
 }

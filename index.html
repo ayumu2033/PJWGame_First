@@ -14,7 +14,7 @@ function connection(){
     var drawCount = 0;
 
     var connection;
-    var DrawObjects;
+    var DrawObjects = {};
 
     try{
         connection = new WebSocket('ws://127.0.0.1:8080');
@@ -136,7 +136,11 @@ function connection(){
     }
 
     connection.onmessage = function(e) {
-        DrawObjects = JSON.parse(e.data);
+        var jsonObj = JSON.parse(e.data);
+        Object.assign(DrawObjects, jsonObj.update);
+        jsonObj.remove.forEach(function(tag){
+            delete DrawObjects[tag];
+        })
         // FPS測定
         mesCount++;
     };

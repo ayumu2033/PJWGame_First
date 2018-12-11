@@ -4,6 +4,7 @@ namespace MyApp;
 class Player extends MoveableObject{
     private $preBulletShootTime;
     protected $radius = 5;
+    private $speed = 2;
 
     public function __construct($args){
         parent::__construct($args);
@@ -28,6 +29,10 @@ class Player extends MoveableObject{
         if(isset($this->masterObject->pressingKeys[37])){
             $newV->x -=1;
         }
+        if($newV->x != 0 || $newV->y != 0){
+            $newV->x = $newV->x / sqrt($newV->x**2 + $newV->y**2) * $this->speed;
+            $newV->y = $newV->y / sqrt($newV->x**2 + $newV->y**2) * $this->speed;
+        }
         $this->velocity->Set($newV, null);
 
         // Z-Key
@@ -35,7 +40,7 @@ class Player extends MoveableObject{
             if($this->preBulletShootTime == null || $this->preBulletShootTime + 0.25  < microtime(true)){
                 $this->masterObject->addObject(new AutoMoveObject([
                     "pos"=>["x"=>$this->pos->Get()->x+5,"y"=>$this->pos->Get()->y],
-                    "velocity"=>["x"=>2],
+                    "velocity"=>["x"=>3],
                     "shape"=>"normalBullet",
                     "masterObject"=>$this->masterObject,
                     "label"=>"PlayerBullet",
@@ -49,9 +54,13 @@ class Player extends MoveableObject{
         $nowX = $nowX > $jsonMsg->width ? $jsonMsg->width : ($nowX < 0 ? 0 : $nowX);
         $nowY = $this->pos->Get()->y + $this->velocity->Get()->y;
         $nowY = $nowY > $jsonMsg->height ? $jsonMsg->height : ($nowY < 0 ? 0 : $nowY);
+
+        if($nowX == $this->pos->Get()->x && $nowY == $this->pos->Get()->y){
+            return false || parent::onUpdate($jsonMsg);
+        }
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
 
-        return ["pos"=>["x"=>$nowX, "y"=>$nowY], "view"=>$this->view];
+        return true;
     }
     public function onHit($targetObject){
         parent::onHit($targetObject);
