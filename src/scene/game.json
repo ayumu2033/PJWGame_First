@@ -1,0 +1,36 @@
+[
+    {
+        "time":0,
+        "class": "Player",
+        "pos": {
+            "x": 0,
+            "y": 200
+        },
+        "label": "Player",
+        "view": "Player"
+    },
+    {
+        "time":10,
+        "class": "Ground",
+        "pos": {
+            "x": 150,
+            "y": 200
+        },
+        "polygon": [
+            {
+                "x": 30,
+                "y": -80
+            },
+            {
+                "x": 30,
+                "y": 80
+            },
+            {
+                "x": 0,
+                "y": 0
+            }
+        ],
+        "label": "Ground",
+        "view": "Polygon"
+    }
+]

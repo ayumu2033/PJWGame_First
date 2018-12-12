@@ -15,6 +15,8 @@ class GameLoopObject {
     private $objects=[];
     private $removedObjectTags=[];
     private $createdObjectTags=[];
+    private $sceneObjects=[];
+    private $sceneStartedTime;
 
     private $preRenderedTime;
     private $renderingTime;
@@ -42,33 +44,21 @@ class GameLoopObject {
 
     public function onStart($jsonMsg){
         $this->canvasHeight = $jsonMsg->height;
-        $this->createObject([
-            "class"=>"Player",
-            "pos"=>["x"=>0,"y"=>$jsonMsg->height/2],
-            "masterObject"=>$this,
-            "label"=>"Player",
-            "view"=> "Player",
-            ]);
-
-        $this->createObject([
-            "class"=>"Ground",
-            "pos"=>["x"=>150,"y"=>$jsonMsg->height/2],
-            "polygon"=>[
-                    ["x"=>30,"y"=>-80],
-                    ["x"=>30,"y"=>80],
-                    ["x"=>0,"y"=>0],
-                ],
-            "masterObject"=>$this,
-            "label"=>"Ground",
-            "view"=> "Polygon",
-            ]);
 
         $this->preRenderedTime = microtime(true);
         $preEnemyPopTime = microtime(true);
-
+        $this->readSceneFile("game");
+        $this->sceneStartedTime = microtime(true);
         // ゲームループ
         return function() use ($jsonMsg, &$preEnemyPopTime){
             $this->renderingTime = microtime(true);
+
+            foreach($this->sceneObjects as $key=>$objarg){
+                if($objarg["time"] > (microtime(true) - $this->sceneStartedTime) )break;
+                $objarg["masterObject"] = $this;
+                $this->createObject($objarg);
+                unset($this->sceneObjects[$key]);
+            }
             
             // あたり判定
             $labelGroup = [];
@@ -143,6 +133,13 @@ class GameLoopObject {
     public function removeObject($tag){
         unset($this->objects[$tag]);
         $this->removedObjectTags[] = $tag;
+    }
+
+    private $sceneDir = __DIR__ ."/../../scene/";
+    public function readSceneFile($sceneName){
+        $fileContent = json_decode(file_get_contents($this->sceneDir.$sceneName.".json"), true);
+        print_r($fileContent);
+        $this->sceneObjects = $fileContent;
     }
 
     public function createObject($args){
