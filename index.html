@@ -86,11 +86,11 @@ function connection(){
                     case "Polygon":
                         ctx.beginPath();
                         var firstPoint = objValue.polygon[0];
-                        ctx.moveTo(firstPoint.x, firstPoint.y);
+                        ctx.moveTo(objValue.pos.x + firstPoint.x, objValue.pos.y + firstPoint.y);
                         objValue.polygon.forEach(function(v){
-                            ctx.lineTo(v.x, v.y);
+                            ctx.lineTo(objValue.pos.x + v.x, objValue.pos.y + v.y);
                         })
-                        ctx.lineTo(firstPoint.x, firstPoint.y);
+                        ctx.lineTo(objValue.pos.x + firstPoint.x, objValue.pos.y +firstPoint.y);
                         ctx.stroke();
                         ctx.closePath();
                         break;

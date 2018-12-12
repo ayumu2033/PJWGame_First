@@ -53,11 +53,11 @@ class GameLoopObject {
             ]));
 
         $this->addObject(new Ground([
-            "pos"=>["x"=>150,"y"=>$jsonMsg->height/2 + 100],
+            "pos"=>["x"=>150,"y"=>$jsonMsg->height/2],
             "polygon"=>[
-                    ["x"=>150,"y"=>$jsonMsg->height/2 - 100],
-                    ["x"=>200,"y"=>$jsonMsg->height/2],
-                    ["x"=>180,"y"=>$jsonMsg->height/2 +100],
+                    ["x"=>30,"y"=>-80],
+                    ["x"=>30,"y"=>80],
+                    ["x"=>0,"y"=>0],
                 ],
             "masterObject"=>$this,
             "label"=>"Ground",
