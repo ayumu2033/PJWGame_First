@@ -48,6 +48,7 @@ class gameObject{
         return [
             "pos"=>["x"=>$this->pos->Get()->x, "y"=>$this->pos->Get()->y],
             "view"=>$this->view,
+            "timestamp"=>$this->masterObject->getRenderingTime(),
         ];
     }
 

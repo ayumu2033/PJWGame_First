@@ -10,11 +10,14 @@ class GameLoopObject {
     public $connection;
     public $timer;
     public $pressingKeys = [];
+    private $canvasHeight;
 
     private $objects=[];
     private $removedObjectTags=[];
+    private $createdObjectTags=[];
+
     private $preRenderedTime;
-    private $renderedTime;
+    private $renderingTime;
     
     private $hitLayer = [
         "Player" => ["Enemy", "EnemyBullet", "Ground"],
@@ -22,37 +25,33 @@ class GameLoopObject {
         "PlayerBullet" => ["Enemy", "EnemyBullet", "Ground"],
         "Ground" => ["Enemy", "EnemyBullet", "Player"],
     ];
-    private $canvasHeight;
 
     public function __construct($connection){
         $this->connection = $connection;
     }
 
     public function onDeth(){
-        $this->addObject(new Player([
+        $this->createObject([
+            "class"=>"Player",
             "pos"=>["x"=>0,"y"=>$this->canvasHeight/2],
             "masterObject"=>$this,
             "label"=>"Player",
             "view"=> "Player",
-            ]));
+            ]);
     }
 
     public function onStart($jsonMsg){
         $this->canvasHeight = $jsonMsg->height;
-        $this->addObject(new Player([
+        $this->createObject([
+            "class"=>"Player",
             "pos"=>["x"=>0,"y"=>$jsonMsg->height/2],
             "masterObject"=>$this,
             "label"=>"Player",
             "view"=> "Player",
-            ]));
-        $this->addObject(new Enemy([
-            "pos"=>["x"=>300,"y"=>$jsonMsg->height/2],
-            "masterObject"=>$this,
-            "label"=>"Enemy",
-            "view"=> "Enemy",
-            ]));
+            ]);
 
-        $this->addObject(new Ground([
+        $this->createObject([
+            "class"=>"Ground",
             "pos"=>["x"=>150,"y"=>$jsonMsg->height/2],
             "polygon"=>[
                     ["x"=>30,"y"=>-80],
@@ -62,12 +61,15 @@ class GameLoopObject {
             "masterObject"=>$this,
             "label"=>"Ground",
             "view"=> "Polygon",
-            ]));
+            ]);
 
-            $this->preRenderedTime = microtime(true);
-            // ゲームループ
-        return function() use ($jsonMsg){
-            $this->renderedTime = microtime(true);
+        $this->preRenderedTime = microtime(true);
+        $preEnemyPopTime = microtime(true);
+
+        // ゲームループ
+        return function() use ($jsonMsg, &$preEnemyPopTime){
+            $this->renderingTime = microtime(true);
+            
             // あたり判定
             $labelGroup = [];
             foreach($this->objects as $objKey => $obj){
@@ -94,7 +96,23 @@ class GameLoopObject {
             $result = [];
             $result["update"] = [];
 
+            if($preEnemyPopTime + 1 < $this->renderingTime){
+                $preEnemyPopTime = $this->renderingTime;
+                $this->createObject([
+                    "class"=>"Enemy",
+                    "pos"=>["x"=>rand(200, 500),"y"=>rand($jsonMsg->height/2 - 100, $jsonMsg->height/2 + 100)],
+                    "masterObject"=>$this,
+                    "label"=>"Enemy",
+                    "view"=> "Enemy",
+                    ]);
+            }
             // アップデート
+            foreach($this->createdObjectTags as $createdObjTag){
+                $this->objects[$createdObjTag]->onUpdate($jsonMsg);
+                $result["update"][$this->objects[$createdObjTag]->getTag()] = $this->objects[$createdObjTag]->getParams();
+            }
+            $this->createdObjectTags = [];
+
             foreach($this->objects as $objKey => $obj){
                 if($obj->onUpdate($jsonMsg)){
                     $result["update"][$obj->getTag()] = $obj->getParams();
@@ -107,7 +125,7 @@ class GameLoopObject {
                 $this->connection->send(json_encode($result));
             }
             $this->removedObjectTags = [];
-            $this->preRenderedTime = $this->renderedTime;
+            $this->preRenderedTime = $this->renderingTime;
         };
     }
 
@@ -127,8 +145,37 @@ class GameLoopObject {
         $this->removedObjectTags[] = $tag;
     }
 
+    public function createObject($args){
+        if($args["class"] == null){
+            throw new Exception('オブジェクト生成においてクラスが指定されていません。');
+        }
+
+        $tmp = null;
+        switch($args["class"]){
+            case "Player":
+                $tmp = new Player($args);
+                break;
+            case "Enemy":
+                $tmp = new Enemy($args);
+                break;
+            case "Ground":
+                $tmp = new Ground($args);
+                break;
+            case "Bullet":
+                $tmp = new AutoMoveObject($args);
+                break;
+            default:
+                throw new Exception('オブジェクト生成において指定のクラスが存在しません。:'.$args["class"]);
+        }
+        $this->objects[$tmp->getTag()] = $tmp;
+        $this->createdObjectTags[] = $tmp->getTag();
+    }
+
     public function getDeltaTime(){
-        return $this->renderedTime - $this->preRenderedTime;
+        return $this->renderingTime - $this->preRenderedTime;
+    }
+    public function getRenderingTime(){
+        return $this->renderingTime;
     }
 
     public function collisionDetection($obj_1, $obj_2){

@@ -60,27 +60,31 @@ function connection(){
             ctx.clearRect(0,0,canvas.width,canvas.height);
             Object.keys(DrawObjects).forEach(function(key){
                 var objValue = DrawObjects[key];
+                var deltaTime = new Date().getTime()/1000 - objValue.timestamp;
                 switch(objValue["view"]){
                     case "PlayerBullet":
+                        var pos = {"x":objValue.pos.x + objValue.velocity.x * deltaTime, "y":objValue.pos.y + objValue.velocity.y * deltaTime};
                         ctx.beginPath();
-                        ctx.arc(objValue.pos.x, objValue.pos.y, 1, 0, Math.PI*2, true);
+                        ctx.arc(pos.x, pos.y, 1, 0, Math.PI*2, true);
                         ctx.stroke();
                         ctx.closePath();
                         break;
                     case "Player":
                         var preFillStyle = ctx.fillStyle;
+                        var pos = {"x":objValue.pos.x + objValue.velocity.x * deltaTime, "y":objValue.pos.y + objValue.velocity.y * deltaTime};
                         ctx.beginPath();
-                        ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+                        ctx.arc(pos.x, pos.y, 10, 0, Math.PI*2, true);
                         ctx.fill();
                         ctx.fillStyle = "red";
                         ctx.beginPath();
-                        ctx.arc(objValue.pos.x, objValue.pos.y, 5, 0, Math.PI*2, true);
+                        ctx.arc(pos.x, pos.y, 5, 0, Math.PI*2, true);
                         ctx.fill();
                         ctx.fillStyle = preFillStyle;
                         break;
                     case "Enemy":
+                        var pos = {"x":objValue.pos.x + objValue.velocity.x * deltaTime, "y":objValue.pos.y + objValue.velocity.y * deltaTime};
                         ctx.beginPath();
-                        ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
+                        ctx.arc(pos.x, pos.y, 10, 0, Math.PI*2, true);
                         ctx.fill();
                         break;
                     case "Polygon":
@@ -95,9 +99,6 @@ function connection(){
                         ctx.closePath();
                         break;
                     default:
-                        ctx.beginPath();
-                        ctx.arc(objValue.pos.x, objValue.pos.y, 10, 0, Math.PI*2, true);
-                        ctx.fill();
                 }
             })
             drawCount++;

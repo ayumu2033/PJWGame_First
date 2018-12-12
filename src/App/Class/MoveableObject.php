@@ -37,4 +37,10 @@ class MoveableObject extends gameObject{
     public function onHit($targetObject){
         $this->masterObject->removeObject($this->getTag());
     }
+
+    public function getParams(){
+        $result = parent::getParams();
+        $result["velocity"] = $this->velocity->Get();
+        return $result;
+    }
 }
