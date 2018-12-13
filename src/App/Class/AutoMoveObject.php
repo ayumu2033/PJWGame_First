@@ -3,7 +3,7 @@ namespace MyApp;
 
 class AutoMoveObject extends MoveableObject{
     private $shape;
-    protected $radius = 1;
+    protected $radius = 3;
 
     public function __construct($args){
         parent::__construct($args);

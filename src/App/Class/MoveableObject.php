@@ -27,7 +27,7 @@ class MoveableObject extends gameObject{
             return false || parent::onUpdate($jsonMsg);
         }
         $this->pos->Set((object)["x"=>$nowX, "y"=>$nowY], null);
-        return true;
+        return false;
     }
 
     public function getRadius(){

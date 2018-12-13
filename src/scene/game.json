@@ -1,35 +1,193 @@
 [
     {
-        "time":0,
-        "class": "Player",
+        "time": 7,
+        "class": "Enemy",
         "pos": {
-            "x": 0,
-            "y": 200
+            "x": 700,
+            "y": 50
         },
-        "label": "Player",
-        "view": "Player"
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
     },
     {
-        "time":10,
+        "time": 7,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 350
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 9,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 50
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 9,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 350
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 11,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 50
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 11,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 350
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 13,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 50
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 13,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 350
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 15,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 50
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 15,
+        "class": "Enemy",
+        "pos": {
+            "x": 700,
+            "y": 350
+        },
+        "velocity": {
+            "x": -100
+        },
+        "label": "Enemy",
+        "view": "Enemy"
+    },
+    {
+        "time": 25,
         "class": "Ground",
         "pos": {
-            "x": 150,
-            "y": 200
+            "x": 700,
+            "y": -20
         },
         "polygon": [
             {
-                "x": 30,
-                "y": -80
+                "x": 0,
+                "y": 0
             },
             {
-                "x": 30,
-                "y": 80
+                "x": 600,
+                "y": 0
+            },
+            {
+                "x": 600,
+                "y": 100
             },
             {
                 "x": 0,
-                "y": 0
+                "y": 100
             }
         ],
+        "velocity": {
+            "x": -100
+        },
+        "label": "Ground",
+        "view": "Polygon"
+    },
+    {
+        "time": 25,
+        "class": "Ground",
+        "pos": {
+            "x": 700,
+            "y": 320
+        },
+        "polygon": [
+            {
+                "x": 0,
+                "y": 0
+            },
+            {
+                "x": 600,
+                "y": 0
+            },
+            {
+                "x": 600,
+                "y": 100
+            },
+            {
+                "x": 0,
+                "y": 100
+            }
+        ],
+        "velocity": {
+            "x": -100
+        },
         "label": "Ground",
         "view": "Polygon"
     }

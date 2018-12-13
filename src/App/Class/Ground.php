@@ -1,7 +1,7 @@
 <?php
 namespace MyApp;
 
-class Ground extends gameObject{
+class Ground extends MoveableObject{
     private $polygon;
     protected $collisionType = "Polygon";
 

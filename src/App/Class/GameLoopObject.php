@@ -46,11 +46,20 @@ class GameLoopObject {
         $this->canvasHeight = $jsonMsg->height;
 
         $this->preRenderedTime = microtime(true);
-        $preEnemyPopTime = microtime(true);
         $this->readSceneFile("game");
         $this->sceneStartedTime = microtime(true);
+
+
+        $this->createObject([
+            "class"=>"Player",
+            "pos"=>["x"=>0,"y"=>$this->canvasHeight/2],
+            "masterObject"=>$this,
+            "label"=>"Player",
+            "view"=> "Player",
+            ]);
+
         // ゲームループ
-        return function() use ($jsonMsg, &$preEnemyPopTime){
+        return function() use ($jsonMsg){
             $this->renderingTime = microtime(true);
 
             foreach($this->sceneObjects as $key=>$objarg){
@@ -86,16 +95,6 @@ class GameLoopObject {
             $result = [];
             $result["update"] = [];
 
-            if($preEnemyPopTime + 1 < $this->renderingTime){
-                $preEnemyPopTime = $this->renderingTime;
-                $this->createObject([
-                    "class"=>"Enemy",
-                    "pos"=>["x"=>rand(200, 500),"y"=>rand($jsonMsg->height/2 - 100, $jsonMsg->height/2 + 100)],
-                    "masterObject"=>$this,
-                    "label"=>"Enemy",
-                    "view"=> "Enemy",
-                    ]);
-            }
             // アップデート
             foreach($this->createdObjectTags as $createdObjTag){
                 $this->objects[$createdObjTag]->onUpdate($jsonMsg);
@@ -138,7 +137,6 @@ class GameLoopObject {
     private $sceneDir = __DIR__ ."/../../scene/";
     public function readSceneFile($sceneName){
         $fileContent = json_decode(file_get_contents($this->sceneDir.$sceneName.".json"), true);
-        print_r($fileContent);
         $this->sceneObjects = $fileContent;
     }
 

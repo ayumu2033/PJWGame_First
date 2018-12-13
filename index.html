@@ -23,6 +23,9 @@ function connection(){
         return;
     }
 
+    var recieveDataSize = 0;
+    var totalReciveDataSize = 0;
+
     connection.onopen = function(e) {
         document.getElementById("connection").disabled= true;
         console.log("Connection established!");
@@ -32,12 +35,28 @@ function connection(){
         // FPS測定
         var preTime_fps=(new Date).getTime();
         var fpsElem = document.getElementById("FPS");
+        var datasizeElem = document.getElementById("DataSize");
         fpsIntervalId = setInterval(function(){
+            totalReciveDataSize += recieveDataSize;
             var now = (new Date).getTime();
             var div = now - preTime_fps;
             if(div >= 1000){
                 fpsElem.textContent = "Message/Sec:" + parseInt(1000 / (div / mesCount ))
                                         + ", Frame/Sec:" + parseInt(1000 / (div / drawCount ));
+                
+                datasizeElem.textContent =  "Total:" + (function(){
+                                                var unit = ["B","KB","MB","GB"];
+                                                var upperUnit = totalReciveDataSize;
+                                                for(var i=0; i<unit.length-1; i++){
+                                                    if(upperUnit < 1024){
+                                                        return Math.round(upperUnit * 1000) / 1000 + unit[i];
+                                                    }
+                                                    upperUnit = upperUnit / 1024;
+                                                }
+                                                return Math.round(upperUnit * 1000) / 1000 + unit[unit.length -1];
+                                            })()
+                                        + ", "+ parseInt(1000 / (div / recieveDataSize )) + " Byte/Sec:";
+                recieveDataSize = 0;
                 mesCount = 0;
                 drawCount = 0;
                 preTime_fps = now;
@@ -65,7 +84,7 @@ function connection(){
                     case "PlayerBullet":
                         var pos = {"x":objValue.pos.x + objValue.velocity.x * deltaTime, "y":objValue.pos.y + objValue.velocity.y * deltaTime};
                         ctx.beginPath();
-                        ctx.arc(pos.x, pos.y, 1, 0, Math.PI*2, true);
+                        ctx.arc(pos.x, pos.y, 3, 0, Math.PI*2, true);
                         ctx.stroke();
                         ctx.closePath();
                         break;
@@ -90,11 +109,12 @@ function connection(){
                     case "Polygon":
                         ctx.beginPath();
                         var firstPoint = objValue.polygon[0];
-                        ctx.moveTo(objValue.pos.x + firstPoint.x, objValue.pos.y + firstPoint.y);
+                        var pos = {"x":objValue.pos.x + objValue.velocity.x * deltaTime, "y":objValue.pos.y + objValue.velocity.y * deltaTime};
+                        ctx.moveTo(pos.x + firstPoint.x, pos.y + firstPoint.y);
                         objValue.polygon.forEach(function(v){
-                            ctx.lineTo(objValue.pos.x + v.x, objValue.pos.y + v.y);
+                            ctx.lineTo(pos.x + v.x, pos.y + v.y);
                         })
-                        ctx.lineTo(objValue.pos.x + firstPoint.x, objValue.pos.y +firstPoint.y);
+                        ctx.lineTo(pos.x + firstPoint.x, pos.y +firstPoint.y);
                         ctx.stroke();
                         ctx.closePath();
                         break;
@@ -137,6 +157,7 @@ function connection(){
     }
 
     connection.onmessage = function(e) {
+        recieveDataSize += getStringByteSize(e.data);
         var jsonObj = JSON.parse(e.data);
         Object.assign(DrawObjects, jsonObj.update);
         jsonObj.remove.forEach(function(tag){
@@ -144,6 +165,10 @@ function connection(){
         })
         // FPS測定
         mesCount++;
+        function getStringByteSize(string) {
+            string = string ? string : "";
+            return(encodeURIComponent(string).replace(/%../g,"x").length);
+        }
     };
 
     connection.onclose = function(e) {
@@ -161,7 +186,8 @@ window.onload=function(){
 </head>
 <body>
 <button id="connection" onclick="connection()">START</button>
-<span id="FPS">FPS:</span>
+<span id="FPS"></span>
+<span id="DataSize"></span>
 <div style="border:1px solid black;height:400px;width:600px;margin-top:1em;margin:auto">
     <canvas id="canvas"></canvas>
 </div>
