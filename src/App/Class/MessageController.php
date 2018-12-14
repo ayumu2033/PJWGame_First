@@ -7,16 +7,22 @@ use React\EventLoop\LoopInterface;
 class MessageController implements MessageComponentInterface {
     protected $clients;
     private $loop;
+    private $timeoutTimer;
     
     public function __construct($loop) {
         $this->clients = new \SplObjectStorage;
         $this->loop = $loop;
+        // timeout 30s
+        $this->timeoutTimer = $this->loop->addTimer(30, function () {
+            exit(1);
+        });
     }
 
     public function onOpen(ConnectionInterface $conn) {
         // Store the new connection to send messages to later
         $this->clients->attach($conn);
-
+        // timeout cancel
+        $this->loop->cancelTimer($this->timeoutTimer);
         echo "New connection! ({$conn->resourceId})\n";
     }
 
@@ -47,6 +53,8 @@ class MessageController implements MessageComponentInterface {
         $this->clients->detach($conn);
 
         echo "Connection {$conn->resourceId} has disconnected\n";
+        // 1:1webSocket
+        exit(1);
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e) {

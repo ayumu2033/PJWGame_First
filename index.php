@@ -1,3 +1,13 @@
+<?php
+    if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'){
+        // windows
+        pclose(popen("start /b php src\CLI\listener.php", "w"));  
+    }else{
+        // linux
+        exec("nohup php C:\xampp\htdocs\Test\src\CLI\listener.php &");
+    }
+?>
+
 <html>
 <head>
 <title>test</title>
@@ -17,7 +27,7 @@ function connection(){
     var DrawObjects = {};
 
     try{
-        connection = new WebSocket('ws://127.0.0.1:8080');
+        connection = new WebSocket('ws://'+window.location.hostname+':8080');
     }catch(e){
         console.log(e);
         return;
@@ -34,6 +44,7 @@ function connection(){
 
         // FPS測定
         var preTime_fps=(new Date).getTime();
+        
         var fpsElem = document.getElementById("FPS");
         var datasizeElem = document.getElementById("DataSize");
         fpsIntervalId = setInterval(function(){
