@@ -53,8 +53,9 @@ class MessageController implements MessageComponentInterface {
         $this->clients->detach($conn);
 
         echo "Connection {$conn->resourceId} has disconnected\n";
-        // 1:1webSocket
-        exit(1);
+        if($this->clients->count() == 0){
+            exit(1);
+        }
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e) {
