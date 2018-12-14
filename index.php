@@ -4,7 +4,7 @@
         pclose(popen("start /b php src\CLI\listener.php", "w"));  
     }else{
         // linux
-        exec("nohup php C:\xampp\htdocs\Test\src\CLI\listener.php &");
+        exec("nohup php src\CLI\listener.php &");
     }
 ?>
 
