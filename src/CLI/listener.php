@@ -17,7 +17,7 @@ use MyApp\SyncData;
                 new MessageController($loop)
             )
         ),
-        new Reactor('0.0.0.0:35', $loop),
+        new Reactor('0.0.0.0:8080', $loop),
         $loop
     );
 

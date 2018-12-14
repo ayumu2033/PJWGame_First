@@ -27,7 +27,7 @@ function connection(){
     var DrawObjects = {};
 
     try{
-        connection = new WebSocket('ws://'+window.location.hostname+':35');
+        connection = new WebSocket('ws://'+window.location.hostname+':8080');
     }catch(e){
         console.log(e);
         return;
